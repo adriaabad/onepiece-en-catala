@@ -1,0 +1,203 @@
+<!doctype html>
+<html lang="ca">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="dark">
+  <title>One Piece en català · Reproductor local</title>
+  <style>
+    :root { font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; color: #f6f7fb; background: #0b1423; }
+    * { box-sizing: border-box; }
+    body { margin: 0; min-height: 100vh; background: radial-gradient(ellipse 85% 50% at 50% 80%, #14243a 0%, #0b1423 72%); }
+    button, input { font: inherit; }
+    button { cursor: pointer; }
+    .topbar { height: 58px; border-bottom: 1px solid #263247; display: flex; align-items: center; justify-content: space-between; padding: 0 clamp(18px, 3.5vw, 52px); background: #0e1828; }
+    .brand { font-size: clamp(18px, 2vw, 24px); font-weight: 800; letter-spacing: -.03em; }
+    .brand span { color: #ff6959; }
+    .topbar a { color: #aebbd0; font-size: 13px; text-decoration: none; }
+    .topbar a:hover, .source-link:hover { color: #fff; }
+    main { width: min(100% - 44px, 1376px); margin: 28px auto 48px; }
+    .stage { position: relative; height: min(58vh, 650px); background: #000; border: 1px solid #344154; border-radius: 12px; overflow: hidden; box-shadow: 0 24px 60px #0005; }
+    video { width: 100%; height: 100%; display: block; object-fit: contain; background: #000; }
+    .center-play { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 88px; height: 88px; border: 1px solid #ffffff27; border-radius: 50%; color: white; background: #ffffff26; display: grid; place-items: center; backdrop-filter: blur(8px); }
+    .center-play:hover { background: #ffffff40; }
+    .center-play svg { width: 32px; height: 32px; margin-left: 4px; fill: currentColor; }
+    .center-play[hidden] { display: none; }
+    .status { position: absolute; bottom: 58px; left: 20px; right: 20px; text-align: center; pointer-events: none; color: #fff; text-shadow: 0 1px 5px #000; font-size: 14px; }
+    .status:empty { display: none; }
+    .details { text-align: center; padding-top: 24px; }
+    h1 { margin: 0; font-size: clamp(23px, 3vw, 34px); line-height: 1.22; font-weight: 750; letter-spacing: -.035em; }
+    .arc { margin: 7px 0 0; color: #aab7c9; font-size: clamp(15px, 1.5vw, 19px); }
+    .transport { display: flex; justify-content: center; gap: 16px; margin: 25px auto 0; max-width: 920px; }
+    .control { min-height: 58px; display: inline-flex; align-items: center; justify-content: center; gap: 13px; padding: 0 22px; border: 1px solid #38485f; border-radius: 10px; background: #172438; color: #f6f7fb; font-weight: 650; flex: 1; }
+    .control:hover:not(:disabled) { background: #24334a; }
+    .control:disabled { opacity: .42; cursor: not-allowed; }
+    .control.primary { flex: 1.25; background: #fb6657; border-color: #fb6657; color: #fff; }
+    .control.primary:hover { background: #ff786a; }
+    .control svg { width: 20px; height: 20px; fill: currentColor; flex: none; }
+    .tools { display: flex; align-items: center; justify-content: center; flex-wrap: wrap; column-gap: 24px; row-gap: 12px; margin: 18px auto 0; color: #cfd8e7; }
+    .jump { display: flex; align-items: center; gap: 11px; }
+    .jump label { font-weight: 600; }
+    .jump input { width: 90px; height: 43px; padding: 0 12px; border: 1px solid #526178; border-radius: 9px; background: #101d30; color: #fff; }
+    .jump input:focus-visible, button:focus-visible, a:focus-visible { outline: 2px solid #ff8b7c; outline-offset: 3px; }
+    .divider { width: 1px; height: 30px; background: #526178; }
+    .source-link { display: inline-flex; align-items: center; gap: 9px; color: #ff7668; font-weight: 650; text-decoration: none; }
+    .source-link svg { width: 19px; height: 19px; fill: none; stroke: currentColor; stroke-width: 2; }
+    .autonext { display: flex; align-items: center; justify-content: center; gap: 11px; width: fit-content; margin: 21px auto 0; color: #b8c4d5; cursor: pointer; font-size: 14px; }
+    .autonext input { appearance: none; width: 42px; height: 24px; border-radius: 99px; background: #40516a; position: relative; cursor: pointer; transition: background .2s; }
+    .autonext input::after { content: ""; position: absolute; top: 3px; left: 3px; width: 18px; height: 18px; border-radius: 50%; background: white; transition: transform .2s; }
+    .autonext input:checked { background: #fb6657; }
+    .autonext input:checked::after { transform: translateX(18px); }
+    .hint { max-width: 680px; margin: 22px auto 0; color: #8f9fb4; text-align: center; font-size: 12px; line-height: 1.45; }
+    @media (max-width: 660px) {
+      .topbar { height: 54px; } .topbar a { display: none; }
+      main { width: 100%; margin: 0 auto 36px; }
+      .stage { height: auto; aspect-ratio: 16 / 9; border-left: 0; border-right: 0; border-radius: 0; }
+      .center-play { width: 62px; height: 62px; } .center-play svg { width: 25px; }
+      .details { padding: 22px 18px 0; }
+      .transport { gap: 9px; padding: 0 14px; margin-top: 23px; }
+      .control { min-height: 54px; padding: 0 10px; font-size: 13px; gap: 5px; }
+      .control svg { width: 16px; height: 16px; }
+      .tools { column-gap: 14px; } .hint { padding: 0 18px; }
+    }
+    @media (max-width: 400px) { .transport .control span { display: none; } .control svg { width: 21px; height: 21px; } }
+    @media (prefers-reduced-motion: reduce) { *, *::before, *::after { transition: none !important; } }
+  </style>
+</head>
+<body>
+  <header class="topbar">
+    <div class="brand">One Piece <span>en català</span></div>
+    <a href="https://onepiece.xarxacatala.cat/" target="_blank" rel="noopener noreferrer">Web original ↗</a>
+  </header>
+  <main>
+    <div class="stage">
+      <video id="video" controls playsinline preload="metadata"></video>
+      <button class="center-play" id="centerPlay" type="button" aria-label="Reprodueix el capítol"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 3.7c0-.8.9-1.3 1.6-.9l14 8.3a1 1 0 0 1 0 1.8l-14 8.3c-.7.4-1.6-.1-1.6-.9V3.7Z"/></svg></button>
+      <div class="status" id="status" role="status" aria-live="polite"></div>
+    </div>
+    <div class="details">
+      <h1 id="episodeTitle">Capítol 212 · Pluja de targetes vermelles!</h1>
+      <p class="arc" id="arcTitle">Arc de Long Ring Long Land</p>
+    </div>
+    <div class="transport">
+      <button class="control" id="previous" type="button"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 4h2v16H5zm4 8 11-8v16z"/></svg><span>Anterior</span></button>
+      <button class="control primary" id="playPause" type="button"><svg id="playIcon" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 3.7c0-.8.9-1.3 1.6-.9l14 8.3a1 1 0 0 1 0 1.8l-14 8.3c-.7.4-1.6-.1-1.6-.9V3.7Z"/></svg><span id="playText">Reprodueix</span></button>
+      <button class="control" id="next" type="button"><span>Següent episodi</span><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M17 4h2v16h-2zM4 4l11 8-11 8z"/></svg></button>
+    </div>
+    <div class="tools">
+      <div class="jump"><label for="episodeNumber">Capítol</label><input id="episodeNumber" type="number" inputmode="numeric" min="207" max="492" value="212"></div>
+      <span class="divider" aria-hidden="true"></span>
+      <a class="source-link" id="sourceLink" target="_blank" rel="noopener noreferrer"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M13 4h7v7m0-7-9 9M20 14v5a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V5a1 1 0 0 1 1-1h5"/></svg>Obre a Xarxa Català</a>
+    </div>
+    <label class="autonext"><input id="autoNext" type="checkbox" checked><span>Reprodueix automàticament el següent episodi</span></label>
+    <p class="hint">Els vídeos s’obtenen de Xarxa Català i necessiten connexió a Internet. El capítol i el punt de reproducció es desen en aquest navegador.</p>
+  </main>
+  <script>
+    'use strict';
+    // Arc, site season, first site episode ID, first/last episode number, media folder.
+    const arcs = [
+      { name: 'Long Ring Long Land', season: 43, id: 390, first: 207, last: 219, saga: 20 },
+      { name: 'la memòria robada', season: 44, id: 403, first: 220, last: 224, saga: 21 },
+      { name: 'Water 7', season: 45, id: 408, first: 225, last: 263, saga: 22 },
+      { name: 'Enies Lobby', season: 46, id: 447, first: 264, last: 312, saga: 25 },
+      { name: 'el retorn a Water 7', season: 47, id: 496, first: 313, last: 325, saga: 26 },
+      { name: 'en Don Accino', season: 48, id: 509, first: 326, last: 336, saga: 27 },
+      { name: 'Thriller Bark', season: 49, id: 520, first: 337, last: 381, saga: 28 },
+      { name: "l'Illa Balneari", season: 50, id: 565, first: 382, last: 384, saga: 29 },
+      { name: "l'Arxipèlag de Sabaody", season: 51, id: 568, first: 385, last: 407, saga: 30 },
+      { name: 'Amazon Lily', season: 52, id: 591, first: 408, last: 416, saga: 32 },
+      { name: 'Impel Down', season: 53, id: 600, first: 417, last: 458, saga: 33 },
+      { name: 'Marineford', season: 54, id: 642, first: 459, last: 492, saga: 34 }
+    ];
+    const titles = {
+      207: 'La gran aventura a Long Ring Long Land',
+      208: "Els pirates d'en Foxy i el Davy Black Fight",
+      209: "La primera prova: la cursa donut al voltant de l'illa",
+      210: 'Foxy, el guineu platejada, i el seu reguitzell de trampes!',
+      211: 'Segona prova: el ring grogui',
+      212: 'Pluja de targetes vermelles!',
+      213: 'Tercera prova: roda que roda a la cursa de patins',
+      214: 'Una cursa emocionant i sensacional. La volta final',
+      215: 'El salvatge i acalorat joc de matar els pirates',
+      216: 'Pica-paret al penya-segat',
+      217: 'El combat final! La lluita entre els dos capitans',
+      218: "L'atac de raig gandul definitiu contra l'invulnerable Ruffy!",
+      219: 'La lluita intensa i ferotge de la fatídica batalla final'
+    };
+    const $ = (id) => document.getElementById(id);
+    const video = $('video');
+    const episodeNumber = $('episodeNumber');
+    const storageKey = 'onepiece-catala-local-v1';
+    let saved = {};
+    try { saved = JSON.parse(localStorage.getItem(storageKey) || '{}') || {}; } catch (_) {}
+    let current = Number.isInteger(saved.episode) && saved.episode >= 207 && saved.episode <= 492 ? saved.episode : 212;
+    let resumeTime = current === saved.episode && Number.isFinite(saved.time) ? saved.time : 0;
+    $('autoNext').checked = saved.autoNext !== false;
+
+    function arcFor(number) { return arcs.find(arc => number >= arc.first && number <= arc.last); }
+    function sagaFor(number, arc) {
+      if (arc.season === 45) return number < 229 ? 22 : number < 253 ? 23 : 24;
+      if (arc.season === 51) return number < 390 ? 30 : 31;
+      return arc.saga;
+    }
+    function save() {
+      try { localStorage.setItem(storageKey, JSON.stringify({ episode: current, time: video.currentTime || 0, autoNext: $('autoNext').checked })); } catch (_) {}
+    }
+    function updatePlayButtons() {
+      const paused = video.paused;
+      $('centerPlay').hidden = !paused;
+      $('playText').textContent = paused ? 'Reprodueix' : 'Pausa';
+      $('playIcon').innerHTML = paused ? '<path d="M5 3.7c0-.8.9-1.3 1.6-.9l14 8.3a1 1 0 0 1 0 1.8l-14 8.3c-.7.4-1.6-.1-1.6-.9V3.7Z"/>' : '<path d="M6 4h4v16H6zm8 0h4v16h-4z"/>';
+    }
+    async function play() {
+      try { await video.play(); $('status').textContent = ''; }
+      catch (_) { $('status').textContent = 'Prem Reprodueix per iniciar el vídeo.'; updatePlayButtons(); }
+    }
+    function setEpisode(number, startPlaying = false, restoreTime = 0) {
+      const arc = arcFor(number);
+      if (!arc) return;
+      current = number;
+      resumeTime = restoreTime;
+      video.pause();
+      video.src = `https://multimedia.xarxacatala.cat/one-piece/saga-${sagaFor(number, arc)}/op_cat-${number}.mp4`;
+      video.load();
+      $('episodeTitle').textContent = `Capítol ${number}${titles[number] ? ' · ' + titles[number] : ''}`;
+      $('arcTitle').textContent = `Arc de ${arc.name}`;
+      episodeNumber.value = number;
+      $('sourceLink').href = `https://onepiece.xarxacatala.cat/season/${arc.season}?episodeId=${arc.id + number - arc.first}`;
+      $('previous').disabled = number <= 207;
+      $('next').disabled = number >= 492;
+      $('status').textContent = '';
+      updatePlayButtons();
+      save();
+      if (startPlaying) play();
+    }
+    $('previous').addEventListener('click', () => setEpisode(current - 1, true));
+    $('next').addEventListener('click', () => setEpisode(current + 1, true));
+    $('playPause').addEventListener('click', () => video.paused ? play() : video.pause());
+    $('centerPlay').addEventListener('click', play);
+    function jumpToEpisode() {
+      const number = Number(episodeNumber.value);
+      if (number === current) return;
+      if (Number.isInteger(number) && arcFor(number)) setEpisode(number, true);
+      else { episodeNumber.value = current; $('status').textContent = 'Introdueix un capítol del 207 al 492.'; }
+    }
+    episodeNumber.addEventListener('change', jumpToEpisode);
+    episodeNumber.addEventListener('keydown', event => { if (event.key === 'Enter') { event.preventDefault(); jumpToEpisode(); episodeNumber.blur(); } });
+    $('autoNext').addEventListener('change', save);
+    video.addEventListener('play', updatePlayButtons);
+    video.addEventListener('pause', updatePlayButtons);
+    video.addEventListener('loadedmetadata', () => {
+      if (resumeTime > 0 && resumeTime < video.duration - 10) video.currentTime = resumeTime;
+      resumeTime = 0;
+    });
+    video.addEventListener('timeupdate', () => { if (Math.floor(video.currentTime) % 5 === 0) save(); });
+    video.addEventListener('ended', () => {
+      if ($('autoNext').checked && current < 492) setEpisode(current + 1, true);
+      else updatePlayButtons();
+    });
+    video.addEventListener('error', () => { $('status').textContent = 'No s’ha pogut carregar aquest vídeo. Prova «Obre a Xarxa Català».'; updatePlayButtons(); });
+    setEpisode(current, false, resumeTime);
+  </script>
+</body>
+</html>
