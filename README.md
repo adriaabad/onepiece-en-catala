@@ -12,6 +12,6 @@ L'opció de reproducció automàtica passa al capítol següent quan acaba el v�
 
 La pàgina cobreix els capítols 1–492. El codi funciona localment, però els vídeos es reprodueixen des dels servidors de Xarxa Català i requereixen connexió a Internet. El botó **Obre a Xarxa Català** porta al capítol corresponent de la web original.
 
-Quan GitHub Pages estigui activat, [`index.html`](index.html) obrirà el reproductor des de l'adreça principal del lloc.
+Versió web: [obre el reproductor amb GitHub Pages](https://adriaabad.github.io/onepiece-en-catala/). La pàgina [`index.html`](index.html) obre el reproductor des de l'adreça principal del lloc.
 
 Aquest repositori no inclou cap vídeo ni cap imatge de la sèrie.
