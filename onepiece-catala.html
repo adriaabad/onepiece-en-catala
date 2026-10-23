@@ -16,13 +16,17 @@
     .brand span { color: #ff6959; }
     .topbar a { color: #aebbd0; font-size: 13px; text-decoration: none; }
     .topbar a:hover, .source-link:hover { color: #fff; }
-    main { width: min(100% - 44px, 1376px); margin: 28px auto 48px; }
-    .stage { position: relative; height: min(58vh, 650px); background: #000; border: 1px solid #344154; border-radius: 12px; overflow: hidden; box-shadow: 0 24px 60px #0005; }
+    main { width: calc(100% - 24px); margin: 12px auto 48px; }
+    .stage { position: relative; height: calc(100dvh - 88px); min-height: 360px; background: #000; border: 1px solid #344154; border-radius: 12px; overflow: hidden; box-shadow: 0 24px 60px #0005; }
     video { width: 100%; height: 100%; display: block; object-fit: contain; background: #000; }
     .center-play { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 88px; height: 88px; border: 1px solid #ffffff27; border-radius: 50%; color: white; background: #ffffff26; display: grid; place-items: center; backdrop-filter: blur(8px); }
     .center-play:hover { background: #ffffff40; }
     .center-play svg { width: 32px; height: 32px; margin-left: 4px; fill: currentColor; }
     .center-play[hidden] { display: none; }
+    .stage-next { position: absolute; top: 18px; right: 18px; display: inline-flex; align-items: center; gap: 8px; padding: 10px 14px; border: 1px solid #ffffff50; border-radius: 9px; color: white; background: #0c1724c9; backdrop-filter: blur(8px); font-weight: 650; }
+    .stage-next:hover:not(:disabled) { background: #223448ed; }
+    .stage-next:disabled { display: none; }
+    .stage-next svg { width: 17px; height: 17px; fill: currentColor; }
     .status { position: absolute; bottom: 58px; left: 20px; right: 20px; text-align: center; pointer-events: none; color: #fff; text-shadow: 0 1px 5px #000; font-size: 14px; }
     .status:empty { display: none; }
     .details { text-align: center; padding-top: 24px; }
@@ -43,22 +47,30 @@
     .divider { width: 1px; height: 30px; background: #526178; }
     .source-link { display: inline-flex; align-items: center; gap: 9px; color: #ff7668; font-weight: 650; text-decoration: none; }
     .source-link svg { width: 19px; height: 19px; fill: none; stroke: currentColor; stroke-width: 2; }
-    .autonext { display: flex; align-items: center; justify-content: center; gap: 11px; width: fit-content; margin: 21px auto 0; color: #b8c4d5; cursor: pointer; font-size: 14px; }
+    .autonext-settings { display: flex; align-items: center; justify-content: center; flex-wrap: wrap; gap: 12px 24px; margin: 21px auto 0; color: #b8c4d5; font-size: 14px; }
+    .autonext { display: flex; align-items: center; gap: 11px; cursor: pointer; }
     .autonext input { appearance: none; width: 42px; height: 24px; border-radius: 99px; background: #40516a; position: relative; cursor: pointer; transition: background .2s; }
     .autonext input::after { content: ""; position: absolute; top: 3px; left: 3px; width: 18px; height: 18px; border-radius: 50%; background: white; transition: transform .2s; }
     .autonext input:checked { background: #fb6657; }
     .autonext input:checked::after { transform: translateX(18px); }
+    .skip-setting { display: flex; align-items: center; gap: 8px; }
+    .skip-setting input { width: 72px; height: 38px; padding: 0 8px; border: 1px solid #526178; border-radius: 8px; background: #101d30; color: #fff; text-align: center; }
+    .skip-setting input:disabled { opacity: .5; }
+    .skip-setting input:focus-visible { outline: 2px solid #ff8b7c; outline-offset: 3px; }
+    .skip-hint { color: #8f9fb4; font-size: 12px; }
     .hint { max-width: 680px; margin: 22px auto 0; color: #8f9fb4; text-align: center; font-size: 12px; line-height: 1.45; }
     @media (max-width: 660px) {
       .topbar { height: 54px; } .topbar a { display: none; }
       main { width: 100%; margin: 0 auto 36px; }
-      .stage { height: auto; aspect-ratio: 16 / 9; border-left: 0; border-right: 0; border-radius: 0; }
+      .stage { height: auto; min-height: 0; aspect-ratio: 16 / 9; border-left: 0; border-right: 0; border-radius: 0; }
       .center-play { width: 62px; height: 62px; } .center-play svg { width: 25px; }
+      .stage-next { top: 8px; right: 8px; padding: 7px 9px; font-size: 12px; }
+      .stage-next svg { width: 14px; height: 14px; }
       .details { padding: 22px 18px 0; }
       .transport { gap: 9px; padding: 0 14px; margin-top: 23px; }
       .control { min-height: 54px; padding: 0 10px; font-size: 13px; gap: 5px; }
       .control svg { width: 16px; height: 16px; }
-      .tools { column-gap: 14px; } .hint { padding: 0 18px; }
+      .tools { column-gap: 14px; } .autonext-settings { padding: 0 14px; } .hint { padding: 0 18px; }
     }
     @media (max-width: 400px) { .transport .control span { display: none; } .control svg { width: 21px; height: 21px; } }
     @media (prefers-reduced-motion: reduce) { *, *::before, *::after { transition: none !important; } }
@@ -73,6 +85,7 @@
     <div class="stage">
       <video id="video" controls playsinline preload="metadata"></video>
       <button class="center-play" id="centerPlay" type="button" aria-label="Reprodueix el capítol"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 3.7c0-.8.9-1.3 1.6-.9l14 8.3a1 1 0 0 1 0 1.8l-14 8.3c-.7.4-1.6-.1-1.6-.9V3.7Z"/></svg></button>
+      <button class="stage-next" id="stageNext" type="button">Següent episodi <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M17 4h2v16h-2zM4 4l11 8-11 8z"/></svg></button>
       <div class="status" id="status" role="status" aria-live="polite"></div>
     </div>
     <div class="details">
@@ -89,7 +102,10 @@
       <span class="divider" aria-hidden="true"></span>
       <a class="source-link" id="sourceLink" target="_blank" rel="noopener noreferrer"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M13 4h7v7m0-7-9 9M20 14v5a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V5a1 1 0 0 1 1-1h5"/></svg>Obre a Xarxa Català</a>
     </div>
-    <label class="autonext"><input id="autoNext" type="checkbox" checked><span>Reprodueix automàticament el següent episodi</span></label>
+    <div class="autonext-settings">
+      <label class="autonext"><input id="autoNext" type="checkbox" checked><span>Reprodueix automàticament el següent episodi</span></label>
+      <label class="skip-setting" for="skipSeconds">Avança <input id="skipSeconds" type="number" inputmode="numeric" min="0" max="600" step="1" value="0"> segons abans del final <span class="skip-hint">(0 = al final)</span></label>
+    </div>
     <p class="hint">Els vídeos s’obtenen de Xarxa Català i necessiten connexió a Internet. El capítol i el punt de reproducció es desen en aquest navegador.</p>
   </main>
   <script>
@@ -132,7 +148,11 @@
     try { saved = JSON.parse(localStorage.getItem(storageKey) || '{}') || {}; } catch (_) {}
     let current = Number.isInteger(saved.episode) && saved.episode >= 207 && saved.episode <= 492 ? saved.episode : 212;
     let resumeTime = current === saved.episode && Number.isFinite(saved.time) ? saved.time : 0;
+    let skipSeconds = Number.isInteger(saved.skipSeconds) && saved.skipSeconds >= 0 && saved.skipSeconds <= 600 ? saved.skipSeconds : 0;
+    let advancePending = false;
     $('autoNext').checked = saved.autoNext !== false;
+    $('skipSeconds').value = skipSeconds;
+    $('skipSeconds').disabled = !$('autoNext').checked;
 
     function arcFor(number) { return arcs.find(arc => number >= arc.first && number <= arc.last); }
     function sagaFor(number, arc) {
@@ -141,7 +161,7 @@
       return arc.saga;
     }
     function save() {
-      try { localStorage.setItem(storageKey, JSON.stringify({ episode: current, time: video.currentTime || 0, autoNext: $('autoNext').checked })); } catch (_) {}
+      try { localStorage.setItem(storageKey, JSON.stringify({ episode: current, time: video.currentTime || 0, autoNext: $('autoNext').checked, skipSeconds })); } catch (_) {}
     }
     function updatePlayButtons() {
       const paused = video.paused;
@@ -167,13 +187,16 @@
       $('sourceLink').href = `https://onepiece.xarxacatala.cat/season/${arc.season}?episodeId=${arc.id + number - arc.first}`;
       $('previous').disabled = number <= 207;
       $('next').disabled = number >= 492;
+      $('stageNext').disabled = number >= 492;
       $('status').textContent = '';
       updatePlayButtons();
       save();
       if (startPlaying) play();
     }
-    $('previous').addEventListener('click', () => setEpisode(current - 1, true));
-    $('next').addEventListener('click', () => setEpisode(current + 1, true));
+    $('previous').addEventListener('click', () => { advancePending = false; setEpisode(current - 1, true); });
+    function manualNext() { advancePending = false; setEpisode(current + 1, true); }
+    $('next').addEventListener('click', manualNext);
+    $('stageNext').addEventListener('click', manualNext);
     $('playPause').addEventListener('click', () => video.paused ? play() : video.pause());
     $('centerPlay').addEventListener('click', play);
     function jumpToEpisode() {
@@ -184,19 +207,36 @@
     }
     episodeNumber.addEventListener('change', jumpToEpisode);
     episodeNumber.addEventListener('keydown', event => { if (event.key === 'Enter') { event.preventDefault(); jumpToEpisode(); episodeNumber.blur(); } });
-    $('autoNext').addEventListener('change', save);
+    $('autoNext').addEventListener('change', () => { $('skipSeconds').disabled = !$('autoNext').checked; save(); });
+    function updateSkipSeconds() {
+      const value = Number($('skipSeconds').value);
+      skipSeconds = Number.isInteger(value) ? Math.max(0, Math.min(600, value)) : 0;
+      $('skipSeconds').value = skipSeconds;
+      save();
+    }
+    $('skipSeconds').addEventListener('change', updateSkipSeconds);
+    $('skipSeconds').addEventListener('keydown', event => { if (event.key === 'Enter') { event.preventDefault(); updateSkipSeconds(); $('skipSeconds').blur(); } });
     video.addEventListener('play', updatePlayButtons);
     video.addEventListener('pause', updatePlayButtons);
     video.addEventListener('loadedmetadata', () => {
+      advancePending = false;
       if (resumeTime > 0 && resumeTime < video.duration - 10) video.currentTime = resumeTime;
       resumeTime = 0;
     });
-    video.addEventListener('timeupdate', () => { if (Math.floor(video.currentTime) % 5 === 0) save(); });
+    function advanceEpisode() {
+      if (advancePending || !$('autoNext').checked || current >= 492) return;
+      advancePending = true;
+      setEpisode(current + 1, true);
+    }
+    video.addEventListener('timeupdate', () => {
+      if (Math.floor(video.currentTime) % 5 === 0) save();
+      if (skipSeconds > 0 && !video.paused && !video.seeking && Number.isFinite(video.duration) && video.duration > skipSeconds && video.currentTime >= video.duration - skipSeconds) advanceEpisode();
+    });
     video.addEventListener('ended', () => {
-      if ($('autoNext').checked && current < 492) setEpisode(current + 1, true);
+      if ($('autoNext').checked && current < 492) advanceEpisode();
       else updatePlayButtons();
     });
-    video.addEventListener('error', () => { $('status').textContent = 'No s’ha pogut carregar aquest vídeo. Prova «Obre a Xarxa Català».'; updatePlayButtons(); });
+    video.addEventListener('error', () => { advancePending = false; $('status').textContent = 'No s’ha pogut carregar aquest vídeo. Prova «Obre a Xarxa Català».'; updatePlayButtons(); });
     setEpisode(current, false, resumeTime);
   </script>
 </body>
