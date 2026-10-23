@@ -4,7 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="color-scheme" content="dark">
-  <title>One Piece en català · Reproductor local</title>
+  <title>One Piece en català · Reproductor</title>
   <style>
     :root { font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; color: #f6f7fb; background: #0b1423; }
     * { box-sizing: border-box; }
@@ -89,8 +89,8 @@
       <div class="status" id="status" role="status" aria-live="polite"></div>
     </div>
     <div class="details">
-      <h1 id="episodeTitle">Capítol 212 · Pluja de targetes vermelles!</h1>
-      <p class="arc" id="arcTitle">Arc de Long Ring Long Land</p>
+      <h1 id="episodeTitle">Capítol 1 · Soc en Ruffy, el que serà rei dels pirates!</h1>
+      <p class="arc" id="arcTitle">Arc de Romance Dawn</p>
     </div>
     <div class="transport">
       <button class="control" id="previous" type="button"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 4h2v16H5zm4 8 11-8v16z"/></svg><span>Anterior</span></button>
@@ -98,7 +98,7 @@
       <button class="control" id="next" type="button"><span>Següent episodi</span><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M17 4h2v16h-2zM4 4l11 8-11 8z"/></svg></button>
     </div>
     <div class="tools">
-      <div class="jump"><label for="episodeNumber">Capítol</label><input id="episodeNumber" type="number" inputmode="numeric" min="207" max="492" value="212"></div>
+      <div class="jump"><label for="episodeNumber">Capítol</label><input id="episodeNumber" type="number" inputmode="numeric" min="1" max="492" value="1"></div>
       <span class="divider" aria-hidden="true"></span>
       <a class="source-link" id="sourceLink" target="_blank" rel="noopener noreferrer"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M13 4h7v7m0-7-9 9M20 14v5a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V5a1 1 0 0 1 1-1h5"/></svg>Obre a Xarxa Català</a>
     </div>
@@ -112,6 +112,23 @@
     'use strict';
     // Arc, site season, first site episode ID, first/last episode number, media folder.
     const arcs = [
+      { name: 'Romance Dawn', season: 3, id: 184, first: 1, last: 3, saga: 1 },
+      { name: 'Arc del Pallasso Buggy', season: 23, id: 187, first: 4, last: 8, saga: 2 },
+      { name: 'Arc del Capità Kuro', season: 27, id: 192, first: 9, last: 17, saga: 3 },
+      { name: 'Arc del Baratie', season: 29, id: 201, first: 18, last: 30, saga: 4 },
+      { name: "Arc d'Arlong Park", season: 30, id: 214, first: 31, last: 44, saga: 5 },
+      { name: 'Arc de Loguetown', season: 31, id: 228, first: 45, last: 53, saga: 6 },
+      { name: "Arc de l'Illa Creuer", season: 32, id: 237, first: 54, last: 61, saga: 8 },
+      { name: 'Arc del Mont Invertit', season: 33, id: 245, first: 62, last: 63, saga: 9 },
+      { name: 'Arc de Whisky Peak', season: 34, id: 247, first: 64, last: 67, saga: 9 },
+      { name: 'Arc de Little Garden', season: 35, id: 251, first: 68, last: 77, saga: 10 },
+      { name: 'Arc de Drum', season: 36, id: 261, first: 78, last: 91, saga: 12 },
+      { name: "Arc d'Alabasta", season: 37, id: 275, first: 92, last: 135, saga: 13 },
+      { name: "Arc d'en Zenny", season: 38, id: 319, first: 136, last: 138, saga: 15 },
+      { name: 'Arc de la Boira de Sant Martí', season: 39, id: 322, first: 139, last: 143, saga: 16 },
+      { name: 'Arc de Jaya', season: 40, id: 327, first: 144, last: 152, saga: 17 },
+      { name: 'Arc de Skypiea', season: 41, id: 336, first: 153, last: 195, saga: 18 },
+      { name: 'Arc del G8', season: 42, id: 379, first: 196, last: 206, saga: 19 },
       { name: 'Long Ring Long Land', season: 43, id: 390, first: 207, last: 219, saga: 20 },
       { name: 'la memòria robada', season: 44, id: 403, first: 220, last: 224, saga: 21 },
       { name: 'Water 7', season: 45, id: 408, first: 225, last: 263, saga: 22 },
@@ -126,6 +143,9 @@
       { name: 'Marineford', season: 54, id: 642, first: 459, last: 492, saga: 34 }
     ];
     const titles = {
+      1: 'Soc en Ruffy, el que serà rei dels pirates!',
+      2: 'El caçador de pirates Roronoa Zoro! Un mestre espadatxí',
+      3: 'Morgan contra Ruffy i la noia misteriosa',
       207: 'La gran aventura a Long Ring Long Land',
       208: "Els pirates d'en Foxy i el Davy Black Fight",
       209: "La primera prova: la cursa donut al voltant de l'illa",
@@ -146,7 +166,7 @@
     const storageKey = 'onepiece-catala-local-v1';
     let saved = {};
     try { saved = JSON.parse(localStorage.getItem(storageKey) || '{}') || {}; } catch (_) {}
-    let current = Number.isInteger(saved.episode) && saved.episode >= 207 && saved.episode <= 492 ? saved.episode : 212;
+    let current = Number.isInteger(saved.episode) && saved.episode >= 1 && saved.episode <= 492 ? saved.episode : 1;
     let resumeTime = current === saved.episode && Number.isFinite(saved.time) ? saved.time : 0;
     let skipSeconds = Number.isInteger(saved.skipSeconds) && saved.skipSeconds >= 0 && saved.skipSeconds <= 600 ? saved.skipSeconds : 0;
     let advancePending = false;
@@ -156,6 +176,9 @@
 
     function arcFor(number) { return arcs.find(arc => number >= arc.first && number <= arc.last); }
     function sagaFor(number, arc) {
+      if (arc.season === 31) return number < 48 ? 6 : 7;
+      if (arc.season === 35) return number < 70 ? 10 : 11;
+      if (arc.season === 37) return number < 131 ? 13 : 14;
       if (arc.season === 45) return number < 229 ? 22 : number < 253 ? 23 : 24;
       if (arc.season === 51) return number < 390 ? 30 : 31;
       return arc.saga;
@@ -179,13 +202,13 @@
       current = number;
       resumeTime = restoreTime;
       video.pause();
-      video.src = `https://multimedia.xarxacatala.cat/one-piece/saga-${sagaFor(number, arc)}/op_cat-${number}.mp4`;
+      video.src = `https://multimedia.xarxacatala.cat/one-piece/saga-${sagaFor(number, arc)}/op_cat-${String(number).padStart(3, '0')}.mp4`;
       video.load();
       $('episodeTitle').textContent = `Capítol ${number}${titles[number] ? ' · ' + titles[number] : ''}`;
-      $('arcTitle').textContent = `Arc de ${arc.name}`;
+      $('arcTitle').textContent = arc.name.startsWith('Arc ') ? arc.name : `Arc de ${arc.name}`;
       episodeNumber.value = number;
       $('sourceLink').href = `https://onepiece.xarxacatala.cat/season/${arc.season}?episodeId=${arc.id + number - arc.first}`;
-      $('previous').disabled = number <= 207;
+      $('previous').disabled = number <= 1;
       $('next').disabled = number >= 492;
       $('stageNext').disabled = number >= 492;
       $('status').textContent = '';
@@ -203,7 +226,7 @@
       const number = Number(episodeNumber.value);
       if (number === current) return;
       if (Number.isInteger(number) && arcFor(number)) setEpisode(number, true);
-      else { episodeNumber.value = current; $('status').textContent = 'Introdueix un capítol del 207 al 492.'; }
+      else { episodeNumber.value = current; $('status').textContent = 'Introdueix un capítol de l’1 al 492.'; }
     }
     episodeNumber.addEventListener('change', jumpToEpisode);
     episodeNumber.addEventListener('keydown', event => { if (event.key === 'Enter') { event.preventDefault(); jumpToEpisode(); episodeNumber.blur(); } });
